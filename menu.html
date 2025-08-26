@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Foodie's Paradise Tex-Mex</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .menu-nav {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 2rem 0 2rem 0;
+        }
+        .menu-nav button {
+            background: #A8A8D6;
+            color: #222;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .menu-nav button.active {
+            background: #8B8BB7;
+        }
+        .menu-section {
+            display: none;
+            margin-bottom: 2rem;
+        }
+        .menu-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+    <a href="index.html" class="home-link" style="position:absolute;top:1.5rem;left:2rem;background:#A8A8D6;color:#222;padding:0.5rem 1rem;border-radius:4px;text-decoration:none;font-weight:bold;box-shadow:0 1px 4px rgba(0,0,0,0.07);transition:background 0.2s;">Home</a>
+    <h1>Foodie's Paradise Tex-Mex Menu</h1>
+        <nav class="menu-nav" id="menu-nav">
+            <!-- Category buttons will be injected here -->
+        </nav>
+    </header>
+    <main id="menu-main">
+        <!-- Menu sections will be injected here -->
+    </main>
+    <footer>
+        <p>&copy; 2025 Foodie's Paradise</p>
+    </footer>
+    <script>
+        let menuItems = [];
+        fetch('http://localhost:3000/menu')
+            .then(res => res.json())
+            .then(data => {
+                menuItems = data;
+                renderMenuNav();
+                renderMenuSections();
+            });
+
+        function getCategories(items) {
+            const cats = new Set();
+            items.forEach(i => cats.add(i.category));
+            return Array.from(cats);
+        }
+
+        function renderMenuNav() {
+            const nav = document.getElementById('menu-nav');
+            nav.innerHTML = '';
+            const categories = getCategories(menuItems);
+            categories.forEach((cat, idx) => {
+                const btn = document.createElement('button');
+                btn.textContent = cat;
+                btn.dataset.category = cat;
+                if (idx === 0) btn.classList.add('active');
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.menu-nav button').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.menu-section').forEach(sec => sec.classList.remove('active'));
+                    document.getElementById('section-' + cat).classList.add('active');
+                });
+                nav.appendChild(btn);
+            });
+        }
+
+        function renderMenuSections() {
+            const main = document.getElementById('menu-main');
+            main.innerHTML = '';
+            const categories = getCategories(menuItems);
+            categories.forEach((cat, idx) => {
+                const section = document.createElement('section');
+                section.className = 'menu-section' + (idx === 0 ? ' active' : '');
+                section.id = 'section-' + cat;
+                section.innerHTML = `<h2>${cat}</h2>`;
+                // Group similar items for dropdowns
+                if (cat === 'Mains') {
+                    const baseNames = ['quesadilla', 'burrito', 'tacos'];
+                    const groups = {};
+                    menuItems.filter(i => i.category === cat).forEach(item => {
+                        let found = false;
+                        for (const base of baseNames) {
+                            if (item.name.toLowerCase().includes(base)) {
+                                if (!groups[base]) groups[base] = [];
+                                groups[base].push(item);
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            if (!groups[item.name]) groups[item.name] = [];
+                            groups[item.name].push(item);
+                        }
+                    });
+                    Object.keys(groups).forEach(base => {
+                        if (groups[base].length > 1) {
+                            const dropdownDiv = document.createElement('div');
+                            dropdownDiv.className = 'menu-dropdown';
+                            dropdownDiv.innerHTML = `<label>${base.charAt(0).toUpperCase() + base.slice(1)}:</label> <select class="menu-select"><option value="">Choose an option</option></select> <span class="menu-price"></span> <input type="number" min="1" value="1" class="menu-qty" style="width:60px;"> <button class="menu-add" disabled>Add to Cart</button>`;
+                            const select = dropdownDiv.querySelector('.menu-select');
+                            const priceSpan = dropdownDiv.querySelector('.menu-price');
+                            const addBtn = dropdownDiv.querySelector('.menu-add');
+                            groups[base].forEach(item => {
+                                const opt = document.createElement('option');
+                                opt.value = item.id;
+                                opt.textContent = item.name + ` ($${item.price.toFixed(2)})`;
+                                select.appendChild(opt);
+                            });
+                            select.addEventListener('change', () => {
+                                const selectedId = parseInt(select.value);
+                                const selectedItem = groups[base].find(i => i.id === selectedId);
+                                if (selectedItem) {
+                                    priceSpan.textContent = `$${selectedItem.price.toFixed(2)}`;
+                                    addBtn.disabled = false;
+                                } else {
+                                    priceSpan.textContent = '';
+                                    addBtn.disabled = true;
+                                }
+                            });
+                            addBtn.addEventListener('click', () => {
+                                const selectedId = parseInt(select.value);
+                                const selectedItem = groups[base].find(i => i.id === selectedId);
+                                const qty = parseInt(dropdownDiv.querySelector('.menu-qty').value) || 1;
+                                if (selectedItem) {
+                                    alert(`${qty} x ${selectedItem.name} added to cart!`);
+                                }
+                            });
+                            section.appendChild(dropdownDiv);
+                        } else {
+                            groups[base].forEach(item => {
+                                const itemDiv = document.createElement('div');
+                                itemDiv.innerHTML = `
+                                    <h3>${item.name}</h3>
+                                    <p>Price: $${item.price.toFixed(2)}</p>
+                                    <input type="number" min="1" value="1" class="menu-qty" style="width:60px;"> <button class="menu-add">Add to Cart</button>
+                                `;
+                                const addBtn = itemDiv.querySelector('.menu-add');
+                                addBtn.addEventListener('click', () => {
+                                    const qty = parseInt(itemDiv.querySelector('.menu-qty').value) || 1;
+                                    alert(`${qty} x ${item.name} added to cart!`);
+                                });
+                                section.appendChild(itemDiv);
+                            });
+                        }
+                    });
+                } else {
+                    menuItems.filter(i => i.category === cat).forEach(item => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.innerHTML = `
+                            <h3>${item.name}</h3>
+                            <p>Price: $${item.price.toFixed(2)}</p>
+                            <input type="number" min="1" value="1" class="menu-qty" style="width:60px;"> <button class="menu-add">Add to Cart</button>
+                        `;
+                        const addBtn = itemDiv.querySelector('.menu-add');
+                        addBtn.addEventListener('click', () => {
+                            const qty = parseInt(itemDiv.querySelector('.menu-qty').value) || 1;
+                            alert(`${qty} x ${item.name} added to cart!`);
+                        });
+                        section.appendChild(itemDiv);
+                    });
+                }
+                main.appendChild(section);
+            });
+        }
+    </script>
+</body>
+</html>

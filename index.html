@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Food Ordering Application</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+    <a href="login.html" class="login-link">Sign In / Join</a>
+        <h1>Foodie's Paradise</h1>
+        <nav>
+            <ul>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="#cart">Cart</a></li>
+                <li><a href="#order">Order</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section id="menu">
+            <h2>Menu</h2>
+            <div class="menu-nav" style="justify-content:center;gap:2rem;margin:2rem 0;">
+                <a href="menu.html#section-Mains"><button class="menu-nav-btn">Mains</button></a>
+                <a href="menu.html#section-Sides"><button class="menu-nav-btn">Sides</button></a>
+                <a href="menu.html#section-Drinks"><button class="menu-nav-btn">Drinks</button></a>
+                <a href="menu.html#section-Desserts"><button class="menu-nav-btn">Desserts</button></a>
+            </div>
+            <p style="text-align:center;">Browse our full menu by category!</p>
+        </section>
+        <section id="cart">
+            <h2>Your Cart</h2>
+            <div id="cart-items">
+                <!-- Cart items will be displayed here -->
+            </div>
+            <p id="cart-total">Total: $0.00</p>
+        </section>
+        <section id="order">
+            <h2>Place Your Order</h2>
+            <form id="order-form">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" required>
+                <button type="submit">Order Now</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2025 Foodie's Paradise</p>
+    </footer>
+    <script src="main.js"></script>
+</body>
+</html>
