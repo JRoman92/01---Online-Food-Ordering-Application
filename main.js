@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cart = [];
     const menuContainer = document.getElementById('menu-items');
 
-    // Load menu items from backend
-    fetch('http://localhost:3000/menu')
+    // Load menu items from local menu.json
+    fetch('menu.json')
         .then(response => response.json())
         .then(data => {
             menuItems = data;

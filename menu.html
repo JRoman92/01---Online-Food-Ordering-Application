@@ -51,7 +51,7 @@
     </footer>
     <script>
         let menuItems = [];
-        fetch('http://localhost:3000/menu')
+        fetch('menu.json')
             .then(res => res.json())
             .then(data => {
                 menuItems = data;
